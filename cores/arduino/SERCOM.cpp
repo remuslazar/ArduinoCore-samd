@@ -31,6 +31,10 @@ SERCOM::SERCOM(Sercom* s)
   sercom = s;
 }
 
+bool SERCOM::isEnabled() {
+  return sercom->USART.CTRLA.bit.ENABLE;
+}
+
 /* 	=========================
  *	===== Sercom UART
  *	=========================
@@ -104,6 +108,15 @@ void SERCOM::enableUART()
 {
   //Setting  the enable bit to 1
   sercom->USART.CTRLA.bit.ENABLE = 0x1u;
+
+  //Wait for then enable bit from SYNCBUSY is equal to 0;
+  while(sercom->USART.SYNCBUSY.bit.ENABLE);
+}
+
+void SERCOM::disableUART()
+{
+  //Setting  the enable bit to 1
+  sercom->USART.CTRLA.bit.ENABLE = 0x0u;
 
   //Wait for then enable bit from SYNCBUSY is equal to 0;
   while(sercom->USART.SYNCBUSY.bit.ENABLE);
@@ -195,6 +208,7 @@ void SERCOM::disableDataRegisterEmptyInterruptUART()
 {
   sercom->USART.INTENCLR.reg = SERCOM_USART_INTENCLR_DRE;
 }
+
 
 /*	=========================
  *	===== Sercom SPI
@@ -411,12 +425,6 @@ void SERCOM::disableWIRE()
   {
     // Waiting the enable bit from SYNCBUSY is equal to 0;
   }
-}
-
-void SERCOM::runstandbyWIRE(bool runstdby) {
-  disableWIRE();                                 //  RUNSTDBY bit is enable protected so disable the peripheral
-  sercom->I2CM.CTRLA.bit.RUNSTDBY = runstdby ;
-  enableWIRE();
 }
 
 void SERCOM::initSlaveWIRE( uint8_t ucAddress, bool enableGeneralCall )

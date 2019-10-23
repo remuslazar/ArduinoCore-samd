@@ -58,10 +58,6 @@ void TwoWire::setClock(uint32_t baudrate) {
   sercom->enableWIRE();
 }
 
-void TwoWire::standby(bool runstdby) {
-  sercom->runstandbyWIRE(runstdby);
-}
-
 void TwoWire::end() {
   sercom->disableWIRE();
 }
