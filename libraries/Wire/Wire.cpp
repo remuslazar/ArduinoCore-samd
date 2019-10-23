@@ -62,6 +62,10 @@ void TwoWire::standby(bool runstdby) {
   sercom->runstandbyWIRE(runstdby);
 }
 
+bool TwoWire::isEnabled() {
+  return sercom->isEnabled();
+}
+
 void TwoWire::end() {
   sercom->disableWIRE();
 }

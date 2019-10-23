@@ -38,6 +38,7 @@ class TwoWire : public Stream
     void end();
     void setClock(uint32_t);
     void standby(bool runstdby = false);
+    bool isEnabled();
 
     void beginTransmission(uint8_t);
     uint8_t endTransmission(bool stopBit);
@@ -84,6 +85,9 @@ class TwoWire : public Stream
 
     // TWI clock frequency
     static const uint32_t TWI_CLOCK = 100000;
+
+ 		friend class ArduinoLowPowerClass ;
+
 };
 
 #if WIRE_INTERFACES_COUNT > 0

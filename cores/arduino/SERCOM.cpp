@@ -31,6 +31,10 @@ SERCOM::SERCOM(Sercom* s)
   sercom = s;
 }
 
+bool SERCOM::isEnabled() {
+  return sercom->USART.CTRLA.bit.ENABLE;
+}
+
 /* 	=========================
  *	===== Sercom UART
  *	=========================
@@ -104,6 +108,15 @@ void SERCOM::enableUART()
 {
   //Setting  the enable bit to 1
   sercom->USART.CTRLA.bit.ENABLE = 0x1u;
+
+  //Wait for then enable bit from SYNCBUSY is equal to 0;
+  while(sercom->USART.SYNCBUSY.bit.ENABLE);
+}
+
+void SERCOM::disableUART()
+{
+  //Setting  the enable bit to 1
+  sercom->USART.CTRLA.bit.ENABLE = 0x0u;
 
   //Wait for then enable bit from SYNCBUSY is equal to 0;
   while(sercom->USART.SYNCBUSY.bit.ENABLE);
@@ -196,6 +209,13 @@ void SERCOM::disableDataRegisterEmptyInterruptUART()
   sercom->USART.INTENCLR.reg = SERCOM_USART_INTENCLR_DRE;
 }
 
+void SERCOM::runstandbyUART(bool runstdby) {
+  disableUART();                                 //  RUNSTDBY bit is enable protected so disable the peripheral
+  sercom->USART.CTRLA.bit.RUNSTDBY = runstdby ;
+  enableUART();
+}
+
+
 /*	=========================
  *	===== Sercom SPI
  *	=========================
@@ -270,6 +290,12 @@ void SERCOM::disableSPI()
 
   //Setting the enable bit to 0
   sercom->SPI.CTRLA.bit.ENABLE = 0;
+}
+
+void SERCOM::runstandbySPI(bool runstdby) {
+  disableSPI();                                 //  RUNSTDBY bit is enable protected so disable the peripheral
+  sercom->SPI.CTRLA.bit.RUNSTDBY = runstdby ;
+  enableSPI();
 }
 
 void SERCOM::setDataOrderSPI(SercomDataOrder dataOrder)

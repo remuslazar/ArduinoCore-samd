@@ -128,6 +128,7 @@ class SPIClass {
   // SPI Configuration methods
   void attachInterrupt();
   void detachInterrupt();
+  void standby(bool runstdby = false);
 
   void begin();
   void end();
@@ -154,6 +155,9 @@ class SPIClass {
   uint8_t interruptMode;
   char interruptSave;
   uint32_t interruptMask;
+
+	friend class ArduinoLowPowerClass ;
+
 };
 
 #if SPI_INTERFACES_COUNT > 0

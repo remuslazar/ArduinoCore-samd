@@ -238,3 +238,12 @@ SercomParityMode Uart::extractParity(uint16_t config)
       return SERCOM_ODD_PARITY;
   }
 }
+
+//  USART RUNSTDBY = 1 enables all interrupts
+//  Note, Receive start and Receive Complete interrupts still fire and can wake device with RUNSTDBY = 0
+//  The internal clock source needs to be on
+//  See section 26.6.5 Sleep Mode Operation
+void Uart::standby(bool runstdby) {
+  sercom->runstandbyUART(runstdby);
+}
+
