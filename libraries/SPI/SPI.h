@@ -128,7 +128,6 @@ class SPIClass {
   // SPI Configuration methods
   void attachInterrupt();
   void detachInterrupt();
-  void standby(bool runstdby = false);
 
   void begin();
   void end();

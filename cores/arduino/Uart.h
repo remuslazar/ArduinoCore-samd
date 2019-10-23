@@ -41,7 +41,6 @@ class Uart : public HardwareSerial
     using Print::write; // pull in write(str) and write(buf, size) from Print
 
     void IrqHandler();
-    void standby(bool runstdby = false);
 
     operator bool() { return true; }
 

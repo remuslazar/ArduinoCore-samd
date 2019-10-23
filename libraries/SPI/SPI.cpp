@@ -244,10 +244,6 @@ void SPIClass::detachInterrupt() {
   // Should be disableInterrupt()
 }
 
-void SPIClass::standby(bool runstdby) {
-  _p_sercom->runstandbySPI(runstdby);
-}
-
 #if SPI_INTERFACES_COUNT > 0
   /* In case new variant doesn't define these macros,
    * we put here the ones for Arduino Zero.

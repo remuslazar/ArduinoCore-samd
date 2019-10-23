@@ -146,8 +146,6 @@ class SERCOM
 	public:
 		SERCOM(Sercom* s) ;
 		
-		bool isEnabled( void );
-
 		/* ========== UART ========== */
 		void initUART(SercomUartMode mode, SercomUartSampleRate sampleRate, uint32_t baudrate=0) ;
 		void initFrame(SercomUartCharSize charSize, SercomDataOrder dataOrder, SercomParityMode parityMode, SercomNumberStopBit nbStopBits) ;
@@ -169,7 +167,6 @@ class SERCOM
 		void acknowledgeUARTError() ;
 		void enableDataRegisterEmptyInterruptUART();
 		void disableDataRegisterEmptyInterruptUART();
-		void runstandbyUART( bool );
 		void disableUART( void );
 
 		/* ========== SPI ========== */
@@ -188,7 +185,6 @@ class SERCOM
 		bool isDataRegisterEmptySPI( void ) ;
 		bool isTransmitCompleteSPI( void ) ;
 		bool isReceiveCompleteSPI( void ) ;
-		void runstandbySPI( bool ) ;
 
 		/* ========== WIRE ========== */
 		void initSlaveWIRE(uint8_t address, bool enableGeneralCall = false) ;
@@ -217,7 +213,6 @@ class SERCOM
     bool isRXNackReceivedWIRE( void ) ;
 		int availableWIRE( void ) ;
 		uint8_t readDataWIRE( void ) ;
-		void runstandbyWIRE( bool ) ;
 
 	private:
 		Sercom* sercom;
