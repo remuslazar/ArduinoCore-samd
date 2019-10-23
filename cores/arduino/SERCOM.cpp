@@ -31,10 +31,6 @@ SERCOM::SERCOM(Sercom* s)
   sercom = s;
 }
 
-bool SERCOM::isEnabled() {
-  return sercom->USART.CTRLA.bit.ENABLE;
-}
-
 /* 	=========================
  *	===== Sercom UART
  *	=========================
