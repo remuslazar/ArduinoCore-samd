@@ -181,6 +181,25 @@ const void* g_apTCInstances[TCC_INST_NUM + TC_INST_NUM]={ TCC0, TCC1, TCC2, TC3,
 #define PMIC_REG07    0x07
 #define PMIC_REG08    0x08
 
+static inline uint8_t read_pmic_reg(uint8_t reg) {
+
+  bool ret = PERIPH_WIRE.startTransmissionWIRE( PMIC_ADDRESS, WIRE_WRITE_FLAG );
+  if (!ret) {
+    return false;
+  }
+  PERIPH_WIRE.sendDataMasterWIRE(reg);
+  PERIPH_WIRE.prepareCommandBitsWire(WIRE_MASTER_ACT_STOP);
+
+  ret = PERIPH_WIRE.startTransmissionWIRE( PMIC_ADDRESS, WIRE_READ_FLAG );
+  if (!ret) {
+    return false;
+  }
+  uint8_t res = PERIPH_WIRE.readDataWIRE();
+  PERIPH_WIRE.prepareNackBitWIRE();
+  PERIPH_WIRE.prepareCommandBitsWire(WIRE_MASTER_ACT_STOP);
+  return (res);
+}
+
 static inline void enable_battery_charging() {
 
   bool ret = PERIPH_WIRE.startTransmissionWIRE( PMIC_ADDRESS, WIRE_WRITE_FLAG );
@@ -205,6 +224,8 @@ static inline void disable_battery_charging() {
 
 static inline void disable_battery_fet(bool disabled) {
 
+  uint8_t reg = read_pmic_reg(PMIC_REG07) & 0b11001011;
+
   bool ret = PERIPH_WIRE.startTransmissionWIRE( PMIC_ADDRESS, WIRE_WRITE_FLAG );
   if (!ret) {
     return;
@@ -212,7 +233,8 @@ static inline void disable_battery_fet(bool disabled) {
   PERIPH_WIRE.sendDataMasterWIRE(PMIC_REG07);
   // No D+/D– detection + Safety timer not slowed by 2X during input DPM or thermal regulation +
   // BAT fet disabled/enabled + charge and bat fault INT
-  PERIPH_WIRE.sendDataMasterWIRE(0x0B | (disabled ? 0x20 : 0x00));
+  // reserved bits must be written "010"
+  PERIPH_WIRE.sendDataMasterWIRE(disabled ? reg | 0b00101000 : reg | 0b00001000);
   PERIPH_WIRE.prepareCommandBitsWire(WIRE_MASTER_ACT_STOP);
 }
 
@@ -235,10 +257,7 @@ static inline bool is_battery_present() {
   return ((res & 0b1000) != 0);
 }
 
-static inline void disable_pmic(bool disabled) {
-
-  disable_battery_charging();
-  disable_pmic_watchdog();
+static inline void enable_pmic_hiz() {
 
   uint8_t reg = read_pmic_reg(PMIC_REG00) & 0b01111111;
 
@@ -265,7 +284,7 @@ static inline void reset_pmic_watchdog() {
   PERIPH_WIRE.sendDataMasterWIRE(reg | 0b01000001);
   PERIPH_WIRE.prepareCommandBitsWire(WIRE_MASTER_ACT_STOP);
 
-  bool ret = PERIPH_WIRE.startTransmissionWIRE( PMIC_ADDRESS, WIRE_WRITE_FLAG );
+  ret = PERIPH_WIRE.startTransmissionWIRE( PMIC_ADDRESS, WIRE_WRITE_FLAG );
   if (!ret) {
     return;
   }
@@ -289,23 +308,13 @@ static inline void disable_pmic_watchdog() {
   PERIPH_WIRE.prepareCommandBitsWire(WIRE_MASTER_ACT_STOP);
 }
 
-static inline uint8_t read_pmic_reg(uint8_t reg) {
+static inline void disable_pmic(bool disabled) {
 
-  bool ret = PERIPH_WIRE.startTransmissionWIRE( PMIC_ADDRESS, WIRE_WRITE_FLAG );
-  if (!ret) {
-    return false;
-  }
-  PERIPH_WIRE.sendDataMasterWIRE(reg);
-  PERIPH_WIRE.prepareCommandBitsWire(WIRE_MASTER_ACT_STOP);
+  disable_battery_fet(true);
+  disable_battery_charging();
+  disable_pmic_watchdog();
+  enable_pmic_hiz();
 
-  ret = PERIPH_WIRE.startTransmissionWIRE( PMIC_ADDRESS, WIRE_READ_FLAG );
-  if (!ret) {
-    return false;
-  }
-  uint8_t res = PERIPH_WIRE.readDataWIRE();
-  PERIPH_WIRE.prepareNackBitWIRE();
-  PERIPH_WIRE.prepareCommandBitsWire(WIRE_MASTER_ACT_STOP);
-  return (res);
 }
 
 void initVariant() {
@@ -314,7 +323,6 @@ void initVariant() {
   pinPeripheral(PIN_WIRE_SDA, g_APinDescription[PIN_WIRE_SDA].ulPinType);
   pinPeripheral(PIN_WIRE_SCL, g_APinDescription[PIN_WIRE_SCL].ulPinType);
 
-/*
   enable_battery_charging();
   //disable_battery_fet(false);
   delay(100);
@@ -322,8 +330,6 @@ void initVariant() {
   if (!batteryPresent) {
     disable_battery_charging();
   }
-*/
-  disable_pmic();
   
   PERIPH_WIRE.disableWIRE();
 }
