@@ -238,3 +238,4 @@ SercomParityMode Uart::extractParity(uint16_t config)
       return SERCOM_ODD_PARITY;
   }
 }
+
